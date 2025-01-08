@@ -68,7 +68,7 @@ uint8_t MAG_Z_H[1] = {0x2D};
 
 #define DELAY 10 // delay between measurements in ms
 
-class CalibThread : public StaticThread<>
+class IMUtestThread : public StaticThread<>
 {
 protected:
     int iteration;
@@ -183,7 +183,7 @@ protected:
     }
 
 public:
-    CalibThread() : StaticThread("Hello World", 1000) {}
+    IMUtestThread() : StaticThread("Hello World", 1000) {}
 
     void init()
     {
@@ -206,95 +206,15 @@ public:
         imu.write(MagADDR, INIT_REG_MAG_3, 2);
     }
 
-    void calibrate_gyr()
-    {
-        PRINTF("calibrating gyroscope in 5 sec! don't move pls :)\n");
-        AT(NOW() + 5 * SECONDS);
-        PRINTF("calibrating...");
-
-        iteration = 0;
-        float measurement_buffer[3] = {0.0f, 0.0f, 0.0f};
-        while (++iteration < GYR_NUM_ITERATIONS)
-        {
-            readRawIMU();
-            for (int i = 0; i < 3; i++)
-                measurement_buffer[i] += (70.0f / 1000) * GYR_RAW_VALS[i]; // cant save raw coz it would overflow ): float might be too inaccurate idk
-            AT(NOW() + DELAY * MILLISECONDS);
-        }
-        for (int i = 0; i < 3; i++)
-            GYR_CALIB_VALS[i] = measurement_buffer[i] / GYR_NUM_ITERATIONS;
-        PRINTF("gyroscope calibration done!\n");
-    }
-
-    void calibrate_acc()
-    {
-        PRINTF("calibrating acc!");
-
-        iteration = 0;
-        float measurement_buffer[3] = {0.0f, 0.0f, 0.0f};
-        for (int axis = 0; axis < 3; axis++)
-        {
-            switch (axis)
-            {
-            case 0:
-                PRINTF("calibrating x in 5 sec!");
-                break;
-            case 1:
-                PRINTF("calibrating y in 5 sec!");
-                break;
-            case 2:
-                PRINTF("calibrating z in 5 sec!");
-                break;
-            }
-            AT(NOW() + 5 * SECONDS);
-            PRINTF("calibrating...");
-            while (++iteration < ACC_NUM_ITERATIONS)
-            {
-
-                readRawIMU();
-                measurement_buffer[axis] += (0.061f / 1000) * ACC_RAW_VALS[axis];
-                AT(NOW() + DELAY * MILLISECONDS);
-            }
-            ACC_CALIB_VALS[axis] = measurement_buffer[axis] / ACC_NUM_ITERATIONS;
-            PRINTF("axis %d done!", axis);
-        }
-        PRINTF("gyroscope calibration done!");
-    }
-
-    void calibrate_mag()
-    {
-        PRINTF("calibrating magnetometer in 5 sec! try to hit every orientation :) calibration will take %d s\n", MAG_NUM_ITERATIONS / SECONDS);
-        AT(NOW() + 5 * SECONDS);
-        PRINTF("calibrating...");
-        iteration = 0;
-        for (int i = 0; i < 3; i++)
-        {
-            MAG_BOUNDRIES[i][0] = -FLT_MAX;
-            MAG_BOUNDRIES[i][1] = FLT_MAX;
-        }
-        while (++iteration < MAG_NUM_ITERATIONS)
-        {
-            readRawIMU();
-            for (int i = 0; i < 3; i++)
-            {
-                MAG_BOUNDRIES[i][0] = min((float)MAG_RAW_VALS[0], MAG_BOUNDRIES[i][0]);
-                MAG_BOUNDRIES[i][0] = max((float)MAG_RAW_VALS[0], MAG_BOUNDRIES[i][0]);
-            }
-            AT(NOW() + DELAY * MILLISECONDS);
-            if (iteration % max((SECONDS / DELAY), (long long int)1) == 0)
-                PRINTF("%d seconds left!", (MAG_NUM_ITERATIONS - iteration) / SECONDS);
-        }
-    }
-
     void
     run()
     {
-        calibrate_gyr();
-        calibrate_acc();
-        calibrate_mag();
-        PRINTF("CALIBRATION VALUE:");
-        PRINTF("gyr = {%f,%f,%f}", GYR_CALIB_VALS[0], GYR_CALIB_VALS[1], GYR_CALIB_VALS[2]);
-        PRINTF("acc = {%f,%f,%f}", ACC_CALIB_VALS[0], ACC_CALIB_VALS[1], ACC_CALIB_VALS[2]);
-        PRINTF("mag = {{%f,%f},{%f,%f},{%f,%f}}", MAG_BOUNDRIES[0][0], MAG_BOUNDRIES[0][1], MAG_BOUNDRIES[1][0], MAG_BOUNDRIES[1][1], MAG_BOUNDRIES[2][0], MAG_BOUNDRIES[2][1]);
+        while (1)
+        {
+            readIMU();
+            // you can use the other print methods if that is more interesting to you c:
+            printReal();
+            AT(NOW() + DELAY * MILLISECONDS);
+        }
     }
 } calibThread;

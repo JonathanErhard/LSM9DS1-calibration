@@ -23,6 +23,9 @@ Call
 ```
 
 again to recompile rodos!
+
+# HowTo calibrate
+
 After that you can calibrate the IMU by using
 
 ```bash
@@ -30,4 +33,15 @@ After that you can calibrate the IMU by using
 ```
 
 to compile rodos-src/LSM9DS1-calibration.cpp and flash the board (make sure the programming wire is connected.)
-the rest of the calibration is trivial if you do what the print statements tell you to do. GLFH :D
+Make sure LSM9DS1-calibration.cpp is in CompileList.txt c: Note: the command does not recompile rodos!
+the rest of the calibration is trivial if you do what the print statements tell you to do.
+
+# HowTo test
+
+set program to test_IMU.cpp using CompileList.txt (just write test_IMU.cpp into the file) and call
+
+```bash
+./scripts/setup.sh discovery
+```
+
+to compile and flash the test-file. Note: the command does not recompile rodos!
