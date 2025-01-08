@@ -292,5 +292,9 @@ public:
         calibrate_gyr();
         calibrate_acc();
         calibrate_mag();
+        PRINTF("CALIBRATION VALUE:");
+        PRINTF("gyr = {%f,%f,%f}", GYR_CALIB_VALS[0], GYR_CALIB_VALS[1], GYR_CALIB_VALS[2]);
+        PRINTF("acc = {%f,%f,%f}", ACC_CALIB_VALS[0], ACC_CALIB_VALS[1], ACC_CALIB_VALS[2]);
+        PRINTF("mag = {{%f,%f},{%f,%f},{%f,%f}}", MAG_BOUNDRIES[0][0], MAG_BOUNDRIES[0][1], MAG_BOUNDRIES[1][0], MAG_BOUNDRIES[1][1], MAG_BOUNDRIES[2][0], MAG_BOUNDRIES[2][1]);
     }
 } calibThread;
